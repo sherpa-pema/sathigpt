@@ -54,7 +54,7 @@
     #sathi-btn {
       position: fixed;
       right: 24px;
-      bottom: 24px;
+      bottom: calc(24px + env(safe-area-inset-bottom));
       width: 66px;
       height: 66px;
       border: none;
@@ -77,9 +77,9 @@
     #sathi-widget {
       position: fixed;
       right: 24px;
-      bottom: 102px;
+      bottom: calc(102px + env(safe-area-inset-bottom));
       width: min(400px, calc(100vw - 24px));
-      height: min(78vh, 700px);
+      height: min(78dvh, 700px);
       display: none;
       flex-direction: column;
       background: rgba(255, 252, 247, 0.94);
@@ -279,6 +279,7 @@
       color: var(--text);
       outline: none;
       line-height: 1.55;
+      font-size: 16px;
     }
 
     #sathi-input:focus {
@@ -323,15 +324,15 @@
     @media (max-width: 560px) {
       #sathi-widget {
         right: 10px;
-        bottom: 84px;
+        bottom: calc(84px + env(safe-area-inset-bottom));
         width: calc(100vw - 20px);
-        height: min(78vh, 700px);
+        height: min(78dvh, 700px);
         border-radius: 24px;
       }
 
       #sathi-btn {
         right: 10px;
-        bottom: 10px;
+        bottom: calc(10px + env(safe-area-inset-bottom));
       }
 
       .widget-top,
