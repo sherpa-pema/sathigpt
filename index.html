@@ -279,6 +279,7 @@
       color: var(--text);
       outline: none;
       line-height: 1.55;
+      font-size: 16px;
     }
 
     #sathi-input:focus {
@@ -426,18 +427,27 @@
     renderMessages();
     autoResizeInput();
 
+    function shouldAutoFocusInput() {
+      return window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth > 768;
+    }
+
+    function focusInputIfAppropriate() {
+      if (!shouldAutoFocusInput()) return;
+      requestAnimationFrame(() => inputEl.focus());
+    }
+
     function toggleChat() {
       const open = widget.style.display === 'flex';
       widget.style.display = open ? 'none' : 'flex';
       if (!open) {
-        inputEl.focus();
+        focusInputIfAppropriate();
         scrollToBottom();
       }
     }
 
     function openChat() {
       widget.style.display = 'flex';
-      inputEl.focus();
+      focusInputIfAppropriate();
       scrollToBottom();
     }
 
@@ -586,7 +596,7 @@
       } finally {
         clearTimeout(timeoutId);
         setSendingState(false);
-        inputEl.focus();
+        focusInputIfAppropriate();
       }
     }
 
@@ -596,7 +606,7 @@
       sessionId = createSessionId();
       renderMessages();
       statusEl.textContent = 'Chat reset';
-      inputEl.focus();
+      focusInputIfAppropriate();
       setTimeout(() => {
         if (!isSending) statusEl.textContent = 'Ready';
       }, 1200);
