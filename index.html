@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ <title>Sathi GPT — Your AI Companion</title>
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Serif+Display&display=swap" rel="stylesheet">
+ <style>
+ *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+```
+:root {
+ --bg: #fafaf9;
+ --bg2: #f4f3f0;
+ --text: #1a1915;
+ --muted: #9a9690;
+ --border: #e8e6e1;
+ --accent: #1a1915;
+ --accent-hover: #333;
+ --green: #16a34a;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+ background: var(--bg);
+ color: var(--text);
+ font-family: 'DM Sans', sans-serif;
+ min-height: 100vh;
+ overflow-x: hidden;
+}
+
+/* NAV */
+nav {
+ position: fixed; top: 0; left: 0; right: 0;
+ padding: 0 40px;
+ height: 60px;
+ display: flex; align-items: center; justify-content: space-between;
+ z-index: 100;
+ background: rgba(250,250,249,0.92);
+ backdrop-filter: blur(12px);
+ border-bottom: 1px solid var(--border);
+}
+
+.logo {
+ font-size: 16px; font-weight: 600;
+ letter-spacing: -0.02em; color: var(--text);
+ display: flex; align-items: center; gap: 8px;
+}
+
+.logo-mark {
+ width: 24px; height: 24px; border-radius: 6px;
+ background: var(--text);
+ display: flex; align-items: center; justify-content: center;
+ font-size: 12px; color: white; font-weight: 600;
+}
+
+.nav-cta {
+ background: var(--text); color: white;
+ border: none; border-radius: 6px;
+ padding: 8px 18px;
+ font-size: 13px; font-weight: 500;
+ cursor: pointer; font-family: 'DM Sans', sans-serif;
+ transition: background 0.15s; letter-spacing: -0.01em;
+}
+.nav-cta:hover { background: var(--accent-hover); }
+
+/* HERO */
+.hero {
+ min-height: 100vh;
+ display: flex; flex-direction: column;
+ align-items: center; justify-content: center;
+ text-align: center;
+ padding: 100px 24px 80px;
+}
+
+.hero-eyebrow {
+ font-size: 12px; font-weight: 500;
+ letter-spacing: 0.08em; text-transform: uppercase;
+ color: var(--muted); margin-bottom: 28px;
+ animation: fadeUp 0.5s ease both;
+}
+
+h1 {
+ font-family: 'DM Serif Display', serif;
+ font-size: clamp(52px, 9vw, 100px);
+ font-weight: 400;
+ letter-spacing: -0.03em;
+ line-height: 0.95;
+ margin-bottom: 28px;
+ color: var(--text);
+ animation: fadeUp 0.5s ease 0.1s both;
+}
+
+h1 em { font-style: italic; color: var(--muted); }
+
+.hero-sub {
+ font-size: clamp(15px, 2vw, 17px);
+ color: var(--muted);
+ max-width: 400px;
+ line-height: 1.65; font-weight: 300;
+ margin-bottom: 44px;
+ animation: fadeUp 0.5s ease 0.2s both;
+}
+
+.hero-actions {
+ display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+ animation: fadeUp 0.5s ease 0.3s both;
+}
+
+.btn-primary {
+ background: var(--text); color: white;
+ border: none; border-radius: 8px;
+ padding: 13px 26px;
+ font-size: 14px; font-weight: 500;
+ cursor: pointer; font-family: 'DM Sans', sans-serif;
+ transition: all 0.15s; letter-spacing: -0.01em;
+}
+.btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+
+.btn-secondary {
+ background: transparent; color: var(--muted);
+ border: 1px solid var(--border);
+ border-radius: 8px; padding: 13px 26px;
+ font-size: 14px; font-weight: 400;
+ cursor: pointer; font-family: 'DM Sans', sans-serif;
+ transition: all 0.15s; letter-spacing: -0.01em;
+}
+.btn-secondary:hover { color: var(--text); border-color: #ccc; }
+
+@keyframes fadeUp {
+ from { opacity: 0; transform: translateY(16px); }
+ to { opacity: 1; transform: translateY(0); }
+}
+
+.divider {
+ width: 1px; height: 60px;
+ background: var(--border); margin: 0 auto;
+}
+
+/* FEATURES */
+.features {
+ padding: 80px 24px 100px;
+ max-width: 860px; margin: 0 auto;
+}
+
+.section-label {
+ font-size: 11px; font-weight: 500;
+ letter-spacing: 0.1em; text-transform: uppercase;
+ color: var(--muted); margin-bottom: 40px; text-align: center;
+}
+
+.features-grid {
+ display: grid;
+ grid-template-columns: repeat(2, 1fr);
+ gap: 1px;
+ background: var(--border);
+ border: 1px solid var(--border);
+ border-radius: 12px; overflow: hidden;
+}
+
+.feature-card {
+ background: var(--bg);
+ padding: 32px 28px;
+ transition: background 0.15s;
+}
+.feature-card:hover { background: var(--bg2); }
+
+.feature-num {
+ font-size: 11px; font-weight: 500;
+ color: var(--muted); letter-spacing: 0.05em; margin-bottom: 20px;
+}
+
+.feature-title {
+ font-size: 15px; font-weight: 500;
+ margin-bottom: 8px; color: var(--text); letter-spacing: -0.02em;
+}
+
+.feature-desc {
+ font-size: 13px; color: var(--muted);
+ line-height: 1.6; font-weight: 300;
+}
+
+/* FOOTER */
+footer {
+ border-top: 1px solid var(--border);
+ padding: 28px 40px;
+ display: flex; align-items: center; justify-content: space-between;
+ flex-wrap: wrap; gap: 12px;
+}
+
+.footer-logo { font-size: 13px; font-weight: 500; color: var(--muted); }
+.footer-text { font-size: 12px; color: var(--muted); }
+
+/* CHAT WIDGET */
+#sathi-btn {
+ position: fixed; bottom: 24px; right: 24px;
+ width: 48px; height: 48px; border-radius: 50%;
+ background: var(--text);
+ border: none; cursor: pointer;
+ box-shadow: 0 2px 16px rgba(0,0,0,0.12);
+ z-index: 1000;
+ transition: all 0.2s;
+ display: flex; align-items: center; justify-content: center;
+ color: white;
+}
+#sathi-btn:hover { transform: scale(1.06); }
+
+#sathi-widget {
+ position: fixed; bottom: 84px; right: 24px;
+ width: 320px;
+ background: white;
+ border: 1px solid var(--border);
+ border-radius: 12px;
+ display: none; flex-direction: column;
+ z-index: 1000; overflow: hidden;
+ box-shadow: 0 8px 40px rgba(0,0,0,0.09);
+ font-family: 'DM Sans', sans-serif;
+}
+
+#sathi-header {
+ padding: 14px 16px;
+ border-bottom: 1px solid var(--border);
+ display: flex; align-items: center; gap: 10px;
+}
+
+.sathi-avatar {
+ width: 30px; height: 30px; border-radius: 50%;
+ background: var(--text);
+ display: flex; align-items: center; justify-content: center;
+ font-size: 13px; font-weight: 600;
+ flex-shrink: 0; color: white;
+}
+
+.sathi-info { flex: 1; }
+.sathi-name { font-size: 13px; font-weight: 500; color: var(--text); letter-spacing: -0.01em; }
+.sathi-status {
+ font-size: 11px; color: var(--green);
+ display: flex; align-items: center; gap: 4px;
+}
+.sathi-status::before {
+ content: ''; width: 5px; height: 5px;
+ border-radius: 50%; background: var(--green); display: inline-block;
+}
+
+#sathi-close {
+ background: none; border: none; color: var(--muted);
+ cursor: pointer; font-size: 20px; padding: 2px;
+ line-height: 1; transition: color 0.15s;
+}
+#sathi-close:hover { color: var(--text); }
+
+#sathi-msgs {
+ height: 280px; overflow-y: auto;
+ padding: 14px; display: flex;
+ flex-direction: column; gap: 8px;
+ background: var(--bg);
+}
+
+#sathi-msgs::-webkit-scrollbar { width: 3px; }
+#sathi-msgs::-webkit-scrollbar-track { background: transparent; }
+#sathi-msgs::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.s-msg {
+ max-width: 84%; padding: 9px 12px;
+ border-radius: 10px; font-size: 13px;
+ line-height: 1.5; word-break: break-word;
+}
+.s-msg.u {
+ background: var(--text); color: white;
+ align-self: flex-end; border-bottom-right-radius: 3px;
+}
+.s-msg.b {
+ background: white; color: var(--text);
+ align-self: flex-start; border-bottom-left-radius: 3px;
+ border: 1px solid var(--border);
+}
+.s-msg.typing { color: var(--muted); font-style: italic; }
+
+#sathi-foot {
+ display: flex; align-items: center;
+ padding: 10px; gap: 8px;
+ border-top: 1px solid var(--border);
+ background: white;
+}
+
+#sathi-input {
+ flex: 1; background: var(--bg2);
+ border: 1px solid var(--border);
+ border-radius: 7px; padding: 8px 12px;
+ font-size: 13px; color: var(--text);
+ font-family: 'DM Sans', sans-serif;
+ outline: none; transition: border-color 0.15s;
+}
+#sathi-input:focus { border-color: #bbb; background: white; }
+#sathi-input::placeholder { color: var(--muted); }
+
+#sathi-send {
+ background: var(--text); color: white;
+ border: none; border-radius: 7px;
+ width: 34px; height: 34px;
+ cursor: pointer; font-size: 14px;
+ display: flex; align-items: center; justify-content: center;
+ flex-shrink: 0; transition: background 0.15s;
+}
+#sathi-send:hover { background: var(--accent-hover); }
+
+@media (max-width: 480px) {
+ nav { padding: 0 20px; }
+ #sathi-widget { width: calc(100vw - 24px); right: 12px; }
+ .features-grid { grid-template-columns: 1fr; }
+ footer { padding: 24px 20px; }
+}
+```
+
+ </style>
+</head>
+<body>
+
+ <nav>
+ <div class="logo">
+ <div class="logo-mark">S</div>
+ Sathi GPT
+ </div>
+ <button class="nav-cta" onclick="openChat()">Start chatting</button>
+ </nav>
+
+ <section class="hero">
+ <p class="hero-eyebrow">AI Assistant</p>
+ <h1>Your AI<br><em>companion</em></h1>
+ <p class="hero-sub">Ask anything. Get clear, helpful answers — fast. Sathi is always ready.</p>
+ <div class="hero-actions">
+ <button class="btn-primary" onclick="openChat()">Chat with Sathi →</button>
+ <button class="btn-secondary" onclick="document.querySelector('.features').scrollIntoView({behavior:'smooth'})">See what it does</button>
+ </div>
+ </section>
+
+ <div class="divider"></div>
+
+ <section class="features">
+ <p class="section-label">Capabilities</p>
+ <div class="features-grid">
+ <div class="feature-card">
+ <div class="feature-num">01</div>
+ <div class="feature-title">Instant answers</div>
+ <div class="feature-desc">Get responses in seconds. No waiting, no friction — just ask.</div>
+ </div>
+ <div class="feature-card">
+ <div class="feature-num">02</div>
+ <div class="feature-title">Context-aware</div>
+ <div class="feature-desc">Understands your questions naturally and stays on topic across the conversation.</div>
+ </div>
+ <div class="feature-card">
+ <div class="feature-num">03</div>
+ <div class="feature-title">Multilingual</div>
+ <div class="feature-desc">Comfortable in English and Nepali — talk however feels natural to you.</div>
+ </div>
+ <div class="feature-card">
+ <div class="feature-num">04</div>
+ <div class="feature-title">Always available</div>
+ <div class="feature-desc">24/7, no sign-up needed. Open the chat and start immediately.</div>
+ </div>
+ </div>
+ </section>
+
+ <footer>
+ <div class="footer-logo">Sathi GPT</div>
+ <div class="footer-text">Built with care in Nepal </div>
+ </footer>
+
+ <!-- CHAT WIDGET -->
+
+ <button id="sathi-btn" onclick="toggleChat()" title="Chat with Sathi">
+ <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+ <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+ </svg>
+ </button>
+
+ <div id="sathi-widget">
+ <div id="sathi-header">
+ <div class="sathi-avatar">S</div>
+ <div class="sathi-info">
+ <div class="sathi-name">Sathi GPT</div>
+ <div class="sathi-status">Online</div>
+ </div>
+ <button id="sathi-close" onclick="toggleChat()">×</button>
+ </div>
+ <div id="sathi-msgs">
+ <div class="s-msg b">Hi! I'm Sathi. How can I help you today?</div>
+ </div>
+ <div id="sathi-foot">
+ <input id="sathi-input" placeholder="Ask me anything..." />
+ <button id="sathi-send" onclick="sendMsg()">
+ <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+ <line x1="12" y1="19" x2="12" y2="5"/>
+ <polyline points="5 12 12 5 19 12"/>
+ </svg>
+ </button>
+ </div>
+ </div>
+
+ <script>
+ // ── CONFIG — replace before deploying ──
+ const WEBHOOK_URL = 'REPLACE_WITH_YOUR_WEBHOOK_URL';
+ // ───────────────────────────────────────
+
+ function toggleChat() {
+ const w = document.getElementById('sathi-widget');
+ const open = w.style.display === 'flex';
+ w.style.display = open ? 'none' : 'flex';
+ if (!open) document.getElementById('sathi-input').focus();
+ }
+
+ function openChat() {
+ document.getElementById('sathi-widget').style.display = 'flex';
+ document.getElementById('sathi-input').focus();
+ }
+
+ async function sendMsg() {
+ const input = document.getElementById('sathi-input');
+ const msgs = document.getElementById('sathi-msgs');
+ const text = input.value.trim();
+ if (!text) return;
+
+ msgs.insertAdjacentHTML('beforeend', `<div class="s-msg u">${text}</div>`);
+ input.value = '';
+
+ const typing = document.createElement('div');
+ typing.className = 's-msg b typing';
+ typing.id = 'sathi-typing';
+ typing.textContent = 'Thinking...';
+ msgs.appendChild(typing);
+ msgs.scrollTop = msgs.scrollHeight;
+
+ try {
+ const res = await fetch(WEBHOOK_URL, {
+ method: 'POST',
+ headers: { 'Content-Type': 'application/json' },
+ body: JSON.stringify({ chatInput: text, sessionId: 'sathi-web' })
+ });
+ const data = await res.json();
+ document.getElementById('sathi-typing')?.remove();
+ const reply = data.output || data.reply || data.message || data.text || 'Sorry, I could not understand that.';
+ msgs.insertAdjacentHTML('beforeend', `<div class="s-msg b">${reply}</div>`);
+ } catch {
+ document.getElementById('sathi-typing')?.remove();
+ msgs.insertAdjacentHTML('beforeend', `<div class="s-msg b">Something went wrong. Please try again.</div>`);
+ }
+ msgs.scrollTop = msgs.scrollHeight;
+ }
+
+ document.getElementById('sathi-input').addEventListener('keydown', e => {
+ if (e.key === 'Enter') sendMsg();
+ });
+ </script>
+
+</body>
+</html>
