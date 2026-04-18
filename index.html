@@ -472,13 +472,38 @@
 
     function createSessionId() {
       const created = `sathi-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-      localStorage.setItem(SESSION_KEY, created);
+      try {
+        localStorage.setItem(SESSION_KEY, created);
+      } catch {}
       return created;
     }
 
+    function getStoredSessionId() {
+      try {
+        return localStorage.getItem(SESSION_KEY);
+      } catch {
+        return null;
+      }
+    }
+
+    function getSessionIdFromMessages() {
+      const firstUserMessage = messages.find(message => message.role === 'user' && typeof message.sessionId === 'string' && message.sessionId.trim());
+      return firstUserMessage?.sessionId || null;
+    }
+
     function getOrCreateSessionId() {
-      const existing = localStorage.getItem(SESSION_KEY);
-      return existing || createSessionId();
+      const stored = getStoredSessionId();
+      if (stored) return stored;
+
+      const messageSession = getSessionIdFromMessages();
+      if (messageSession) {
+        try {
+          localStorage.setItem(SESSION_KEY, messageSession);
+        } catch {}
+        return messageSession;
+      }
+
+      return createSessionId();
     }
 
     function loadMessages() {
@@ -487,7 +512,13 @@
         if (!raw) return [...DEFAULT_MESSAGES];
         const parsed = JSON.parse(raw);
         if (!Array.isArray(parsed) || !parsed.length) return [...DEFAULT_MESSAGES];
-        return parsed.filter(item => item && typeof item.text === 'string' && (item.role === 'user' || item.role === 'bot' || item.role === 'error'));
+        return parsed
+          .filter(item => item && typeof item.text === 'string' && (item.role === 'user' || item.role === 'bot' || item.role === 'error'))
+          .map(item => ({
+            role: item.role,
+            text: item.text,
+            ...(typeof item.sessionId === 'string' ? { sessionId: item.sessionId } : {})
+          }));
       } catch {
         return [...DEFAULT_MESSAGES];
       }
@@ -510,8 +541,8 @@
       messagesEl.appendChild(div);
     }
 
-    function appendMessage(role, text) {
-      const message = { role, text };
+    function appendMessage(role, text, extra = {}) {
+      const message = { role, text, ...extra };
       messages.push(message);
       saveMessages();
       addMessageElement(message);
@@ -576,7 +607,7 @@
       const text = typeof prefillText === 'string' ? prefillText.trim() : inputEl.value.trim();
       if (!text) return;
 
-      appendMessage('user', text);
+      appendMessage('user', text, { sessionId });
       inputEl.value = '';
       autoResizeInput();
       addTyping();
