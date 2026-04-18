@@ -592,7 +592,8 @@
           body: JSON.stringify({
             chatInput: text,
             sessionId,
-            source: 'sathi-webapp'
+            source: 'sathi-webapp',
+            domain: window.location.hostname
           }),
           signal: controller.signal
         });
