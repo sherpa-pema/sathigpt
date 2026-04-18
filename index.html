@@ -471,7 +471,14 @@
     }
 
     function createSessionId() {
-      const created = `sathi-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      const host = (window.location.hostname || 'unknown-host').replace(/[^a-zA-Z0-9-]/g, '-');
+      const userAgent = navigator.userAgent || 'unknown-agent';
+      let fingerprint = 0;
+      const source = `${host}|${userAgent}`;
+      for (let i = 0; i < source.length; i += 1) {
+        fingerprint = ((fingerprint << 5) - fingerprint + source.charCodeAt(i)) | 0;
+      }
+      const created = `sathi-${host}-${Math.abs(fingerprint)}`;
       try {
         localStorage.setItem(SESSION_KEY, created);
       } catch {}
