@@ -434,6 +434,7 @@
     const WEBHOOK_URL = 'https://chat.nayanepal.online/webhook/078cb6b6-a4ad-46fc-85e1-ade174ada95d/chat';
     const STORAGE_KEY = 'sathi-gpt-chat-history';
     const SESSION_KEY = 'sathi-gpt-session-id';
+    const HANDOFF_KEY = 'sathi-gpt-handoff-active';
     const DEFAULT_MESSAGES = [
       {
         role: 'bot',
@@ -451,6 +452,7 @@
     let isSending = false;
     let messages = loadMessages();
     let sessionId = getOrCreateSessionId();
+    let handoffActive = getStoredHandoffActive();
 
     renderMessages();
     autoResizeInput();
@@ -491,6 +493,32 @@
       } catch {
         return null;
       }
+    }
+
+    function getStoredHandoffActive() {
+      try {
+        return localStorage.getItem(HANDOFF_KEY) === 'true';
+      } catch {
+        return false;
+      }
+    }
+
+    function setHandoffActive(active) {
+      handoffActive = active;
+      try {
+        if (active) {
+          localStorage.setItem(HANDOFF_KEY, 'true');
+        } else {
+          localStorage.removeItem(HANDOFF_KEY);
+        }
+      } catch {}
+    }
+
+    function isHandoffReply(text) {
+      const normalized = String(text || '').toLowerCase();
+      return normalized.includes('alerted our travel team')
+        || normalized.includes('someone will continue here when available')
+        || normalized.includes('travel team member is now handling');
     }
 
     function getSessionIdFromMessages() {
@@ -670,27 +698,40 @@
         }
 
         if (data && typeof data === 'object' && data.handoff === true) {
+          setHandoffActive(true);
           removeTyping();
           return;
         }
 
         // During human handoff, n8n saves the customer message and may return
-        // the inserted Supabase row: { input: "...", output: null }.
-        // Treat that as a successful silent handoff, not as a failed bot reply.
-        if (
-          data &&
+        // the inserted Supabase row: { input: "...", output: null }, or an
+        // empty object after a Respond node. Treat these as silent successes.
+        const isSilentHandoffRow = data &&
           typeof data === 'object' &&
           typeof data.input === 'string' &&
           (data.output === null || data.output === undefined) &&
-          typeof data.full_name === 'string'
-        ) {
+          typeof data.full_name === 'string';
+        const isEmptyObject = data &&
+          typeof data === 'object' &&
+          !Array.isArray(data) &&
+          Object.keys(data).length === 0;
+        if (handoffActive && (isSilentHandoffRow || isEmptyObject || data === '')) {
           removeTyping();
           return;
         }
 
-        const reply = normalizeReply(data) || 'Sorry, I could not understand that yet.';
+        const reply = normalizeReply(data);
+        if (!reply && handoffActive) {
+          removeTyping();
+          return;
+        }
+
+        if (isHandoffReply(reply)) {
+          setHandoffActive(true);
+        }
+
         removeTyping();
-        appendMessage('bot', reply);
+        appendMessage('bot', reply || 'Sorry, I could not understand that yet.');
       } catch (error) {
         removeTyping();
         appendMessage(
@@ -710,6 +751,7 @@
       messages = [...DEFAULT_MESSAGES];
       saveMessages();
       sessionId = createSessionId();
+      setHandoffActive(false);
       renderMessages();
       if (statusEl) {
         statusEl.textContent = 'Chat reset';
