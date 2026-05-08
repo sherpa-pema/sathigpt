@@ -455,13 +455,51 @@
     let sessionId = getOrCreateSessionId();
     let handoffActive = getStoredHandoffActive();
     let handoffPollTimer = null;
+    let notificationAudioContext = null;
+    const NOTIFICATION_VOLUME = 0.6;
     const seenServerMessageIds = new Set(messages.map(message => message.serverId).filter(Boolean));
 
     renderMessages();
     autoResizeInput();
     if (handoffActive) startHandoffPolling();
 
+    function unlockNotificationSound() {
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        if (!notificationAudioContext) notificationAudioContext = new AudioContextClass();
+        if (notificationAudioContext.state === 'suspended') {
+          notificationAudioContext.resume().catch(() => {});
+        }
+      } catch {}
+    }
+
+    function playNotificationSound() {
+      try {
+        unlockNotificationSound();
+        if (!notificationAudioContext || notificationAudioContext.state !== 'running') return;
+
+        const now = notificationAudioContext.currentTime;
+        const oscillator = notificationAudioContext.createOscillator();
+        const gain = notificationAudioContext.createGain();
+
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(880, now);
+        oscillator.frequency.exponentialRampToValueAtTime(1320, now + 0.08);
+
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(NOTIFICATION_VOLUME, now + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+
+        oscillator.connect(gain);
+        gain.connect(notificationAudioContext.destination);
+        oscillator.start(now);
+        oscillator.stop(now + 0.24);
+      } catch {}
+    }
+
     function toggleChat() {
+      unlockNotificationSound();
       const open = widget.style.display === 'flex';
       widget.style.display = open ? 'none' : 'flex';
       if (!open) {
@@ -471,6 +509,7 @@
     }
 
     function openChat() {
+      unlockNotificationSound();
       widget.style.display = 'flex';
       inputEl.focus();
       scrollToBottom();
@@ -609,6 +648,7 @@
       saveMessages();
       addMessageElement(message);
       scrollToBottom();
+      if (role === 'bot' && !extra.silent) playNotificationSound();
     }
 
     function normalizeHandoffRows(data) {
@@ -810,7 +850,10 @@
       inputEl.focus();
     }
 
-    inputEl.addEventListener('input', autoResizeInput);
+    inputEl.addEventListener('input', () => {
+      unlockNotificationSound();
+      autoResizeInput();
+    });
 
     inputEl.addEventListener('keydown', event => {
       if (event.key === 'Enter' && !event.shiftKey) {
