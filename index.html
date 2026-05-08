@@ -657,11 +657,21 @@
           signal: controller.signal
         });
 
+        if (response.status === 204) {
+          removeTyping();
+          return;
+        }
+
         const contentType = response.headers.get('content-type') || '';
         const data = contentType.includes('application/json') ? await response.json() : await response.text();
 
         if (!response.ok) {
           throw new Error(typeof data === 'string' ? data : `Request failed with status ${response.status}`);
+        }
+
+        if (data && typeof data === 'object' && data.handoff === true) {
+          removeTyping();
+          return;
         }
 
         const reply = normalizeReply(data) || 'Sorry, I could not understand that yet.';
