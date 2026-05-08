@@ -671,12 +671,29 @@
       rows.forEach(row => {
         const id = row?.id == null ? '' : String(row.id);
         if (!id || seenServerMessageIds.has(id)) return;
-        if (typeof row.output !== 'string' || !row.output.trim()) return;
+
+        const output = typeof row.output === 'string' ? row.output.trim() : '';
+        const hasCustomerInput = typeof row.input === 'string' && row.input.trim();
+        if (!output) return;
+
+        // Crystal replies are stored as rows with both input + output, and the
+        // widget already displays those directly from the main chat webhook.
+        // During handoff polling we only want operator replies, which are
+        // stored as output-only rows.
+        if (hasCustomerInput) {
+          seenServerMessageIds.add(id);
+          return;
+        }
+
         if (options.prime) {
           seenServerMessageIds.add(id);
           return;
         }
-        appendMessage('bot', row.output.trim(), { serverId: id });
+        if (messages.some(message => message.role === 'bot' && message.text === output)) {
+          seenServerMessageIds.add(id);
+          return;
+        }
+        appendMessage('bot', output, { serverId: id });
       });
     }
 
