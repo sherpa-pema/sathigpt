@@ -674,6 +674,20 @@
           return;
         }
 
+        // During human handoff, n8n saves the customer message and may return
+        // the inserted Supabase row: { input: "...", output: null }.
+        // Treat that as a successful silent handoff, not as a failed bot reply.
+        if (
+          data &&
+          typeof data === 'object' &&
+          typeof data.input === 'string' &&
+          (data.output === null || data.output === undefined) &&
+          typeof data.full_name === 'string'
+        ) {
+          removeTyping();
+          return;
+        }
+
         const reply = normalizeReply(data) || 'Sorry, I could not understand that yet.';
         removeTyping();
         appendMessage('bot', reply);
