@@ -432,6 +432,7 @@
 
   <script>
     const WEBHOOK_URL = 'https://chat.nayanepal.online/webhook/078cb6b6-a4ad-46fc-85e1-ade174ada95d/chat';
+    const HANDOFF_MESSAGES_URL = 'https://chat.nayanepal.online/webhook/crystal-handoff-load';
     const STORAGE_KEY = 'sathi-gpt-chat-history';
     const SESSION_KEY = 'sathi-gpt-session-id';
     const HANDOFF_KEY = 'sathi-gpt-handoff-active';
@@ -453,9 +454,12 @@
     let messages = loadMessages();
     let sessionId = getOrCreateSessionId();
     let handoffActive = getStoredHandoffActive();
+    let handoffPollTimer = null;
+    const seenServerMessageIds = new Set(messages.map(message => message.serverId).filter(Boolean));
 
     renderMessages();
     autoResizeInput();
+    if (handoffActive) startHandoffPolling();
 
     function toggleChat() {
       const open = widget.style.display === 'flex';
@@ -507,6 +511,11 @@
           localStorage.removeItem(HANDOFF_KEY);
         }
       } catch {}
+      if (active) {
+        startHandoffPolling({ prime: true });
+      } else {
+        stopHandoffPolling();
+      }
     }
 
     function isHandoffReply(text) {
@@ -547,7 +556,8 @@
           .map(item => ({
             role: item.role,
             text: item.text,
-            ...(typeof item.sessionId === 'string' ? { sessionId: item.sessionId } : {})
+            ...(typeof item.sessionId === 'string' ? { sessionId: item.sessionId } : {}),
+            ...(typeof item.serverId === 'string' || typeof item.serverId === 'number' ? { serverId: item.serverId } : {})
           }));
       } catch {
         return [...DEFAULT_MESSAGES];
@@ -595,9 +605,52 @@
     function appendMessage(role, text, extra = {}) {
       const message = { role, text, ...extra };
       messages.push(message);
+      if (message.serverId) seenServerMessageIds.add(String(message.serverId));
       saveMessages();
       addMessageElement(message);
       scrollToBottom();
+    }
+
+    function normalizeHandoffRows(data) {
+      if (!data) return [];
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data.messages)) return data.messages;
+      return [data];
+    }
+
+    async function pollHandoffReplies(options = {}) {
+      if (!handoffActive) return;
+      const response = await fetch(HANDOFF_MESSAGES_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sessionId }),
+      });
+      if (!response.ok) return;
+      const data = await response.json();
+      const rows = normalizeHandoffRows(data);
+      rows.forEach(row => {
+        const id = row?.id == null ? '' : String(row.id);
+        if (!id || seenServerMessageIds.has(id)) return;
+        if (typeof row.output !== 'string' || !row.output.trim()) return;
+        if (options.prime) {
+          seenServerMessageIds.add(id);
+          return;
+        }
+        appendMessage('bot', row.output.trim(), { serverId: id });
+      });
+    }
+
+    function startHandoffPolling(options = {}) {
+      pollHandoffReplies(options).catch(() => {});
+      if (handoffPollTimer) return;
+      handoffPollTimer = setInterval(() => {
+        pollHandoffReplies().catch(() => {});
+      }, 4000);
+    }
+
+    function stopHandoffPolling() {
+      if (handoffPollTimer) clearInterval(handoffPollTimer);
+      handoffPollTimer = null;
     }
 
     function addTyping() {
